@@ -23,3 +23,16 @@ https://www.kaggle.com/janheindejong/greenhouse-gas-emissions-in-the-netherlands
 
 Zwarte Piets Tweets
 https://www.kaggle.com/erikvdven/zwarte-piet-tweets (csv)
+
+Nutritional Information Foods
+https://data.world/adamhelsinger/food-nutrition-information (csv)
+
+Change of nutritional content of food groups over time (USA)
+https://www.cnpp.usda.gov/USFoodSupply-1909-2010 (csv)
+
+Prices of basic foods over time (International)
+https://data.world/wfp/4fdcd4dc-5c2f-43af-a1e4-93c9b6539a27 (csv)
+
+Recommended Nutrient intake
+https://data.world/qwofford/recommended-daily-nutrients-and-macronutrients/activity (csv)
+

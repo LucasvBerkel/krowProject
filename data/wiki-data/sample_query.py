@@ -10,8 +10,10 @@ SELECT ?q WHERE {
   ?q wdt:P31/wdt:P279* wd:Q11424
 }
 """
-r = requests.get(url, params = {'format': 'json', 'query': query})
-data = r.json()
 
-with open('sample_query.json', 'w') as outfile:
-    json.dump(data, outfile)
+if __name__ == "__main__":
+    r = requests.get(url, params = {'format': 'json', 'query': query})
+    data = r.json()
+
+    with open('sample_query.json', 'w') as outfile:
+        json.dump(data, outfile)

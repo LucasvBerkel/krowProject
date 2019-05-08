@@ -1,0 +1,214 @@
+@prefix : <http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2> .
+
+<http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2> rdf:type owl:Ontology .
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#directed
+:directed rdf:type owl:ObjectProperty ;
+          rdfs:domain :Director ;
+          rdfs:range :Title .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#directedBy
+:directedBy rdf:type owl:ObjectProperty ;
+            rdfs:domain :Title ;
+            rdfs:range :Director .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#fromEpisode
+:fromEpisode rdf:type owl:ObjectProperty ;
+             rdfs:domain :Title ;
+             rdfs:range [ rdf:type owl:Restriction ;
+                          owl:onProperty :episode ;
+                          owl:someValuesFrom owl:rational
+                        ] .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#fromSeason
+:fromSeason rdf:type owl:ObjectProperty ;
+            rdfs:domain :Title ;
+            rdfs:range [ rdf:type owl:Restriction ;
+                         owl:onProperty :season ;
+                         owl:someValuesFrom owl:rational
+                       ] .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#hasActor
+:hasActor rdf:type owl:ObjectProperty ;
+          rdfs:domain :Title ;
+          rdfs:range :Actor .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#hasName
+:hasName rdf:type owl:ObjectProperty ;
+         rdfs:domain :Person ;
+         rdfs:range [ rdf:type owl:Restriction ;
+                      owl:onProperty :name ;
+                      owl:someValuesFrom owl:rational
+                    ] .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#hasRating
+:hasRating rdf:type owl:ObjectProperty ;
+           rdfs:domain :Title ;
+           rdfs:range [ rdf:type owl:Restriction ;
+                        owl:onProperty :rating ;
+                        owl:someValuesFrom owl:rational
+                      ] .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#hasTitle
+:hasTitle rdf:type owl:ObjectProperty ;
+          rdfs:domain :Title ;
+          rdfs:range [ rdf:type owl:Restriction ;
+                       owl:onProperty :name ;
+                       owl:someValuesFrom owl:rational
+                     ] .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#languageSpoken
+:languageSpoken rdf:type owl:ObjectProperty ;
+                rdfs:domain :Title ;
+                rdfs:range [ rdf:type owl:Restriction ;
+                             owl:onProperty :language ;
+                             owl:someValuesFrom owl:rational
+                           ] .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#playedIn
+:playedIn rdf:type owl:ObjectProperty ;
+          rdfs:domain :Actor ;
+          rdfs:range :Title .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#releasedInYear
+:releasedInYear rdf:type owl:ObjectProperty ;
+                rdfs:domain :Title .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#titleType
+:titleType rdf:type owl:ObjectProperty ;
+           rdfs:domain :Title .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#writtenBy
+:writtenBy rdf:type owl:ObjectProperty ;
+           rdfs:domain :Title ;
+           rdfs:range :Writer .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#wrote
+:wrote rdf:type owl:ObjectProperty ;
+       rdfs:domain :Writer ;
+       rdfs:range :Title .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#episode
+:episode rdf:type owl:DatatypeProperty ;
+         rdfs:range xsd:integer .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#genre
+:genre rdf:type owl:DatatypeProperty ;
+       rdfs:range xsd:string .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#language
+:language rdf:type owl:DatatypeProperty ;
+          rdfs:range xsd:language .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#name
+:name rdf:type owl:DatatypeProperty ;
+      rdfs:range xsd:Name .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#rating
+:rating rdf:type owl:DatatypeProperty ;
+        rdfs:range xsd:float .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#season
+:season rdf:type owl:DatatypeProperty ;
+        rdfs:range xsd:integer .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#type
+:type rdf:type owl:DatatypeProperty ;
+      rdfs:range xsd:string .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#voteAmount
+:voteAmount rdf:type owl:DatatypeProperty ;
+            rdfs:range xsd:integer .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#Actor
+:Actor rdf:type owl:Class ;
+       rdfs:subClassOf :Person .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#Director
+:Director rdf:type owl:Class ;
+          rdfs:subClassOf :Person .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#Film
+:Film rdf:type owl:Class ;
+      rdfs:subClassOf :Title .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#FilmLanguage
+:FilmLanguage rdf:type owl:Class .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#Person
+:Person rdf:type owl:Class .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#Review
+:Review rdf:type owl:Class .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#Short
+:Short rdf:type owl:Class ;
+       rdfs:subClassOf :Title .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#Title
+:Title rdf:type owl:Class .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#TvEpisode
+:TvEpisode rdf:type owl:Class ;
+           rdfs:subClassOf :Title .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#TvSeries
+:TvSeries rdf:type owl:Class ;
+          rdfs:subClassOf :Title .
+
+
+###  http://www.semanticweb.org/ruben/ontologies/2019/4/untitled-ontology-2#Writer
+:Writer rdf:type owl:Class ;
+        rdfs:subClassOf :Person .
+
+
+###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi

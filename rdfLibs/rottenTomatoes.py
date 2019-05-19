@@ -4,11 +4,10 @@ import csv
 import requests
 import time
 
-import urllib.parse
 from nltk.corpus import wordnet as wn
 
 from rdflib import URIRef, Graph, Literal, Namespace
-from rdflib.namespace import RDF, FOAF
+from rdflib.namespace import RDF, RDFS, OWL
 
 
 source_file = "/data/rotten-tomatoes/rotten_tomatoes_reviews.csv"
@@ -24,15 +23,19 @@ if __name__ == "__main__":
     local = Namespace("localhost:rottenTomatoes/")
     dbpedia = Namespace("http://dbpedia.org/resource/")
 
+    total_start_time = time.time()
+
     with open(git_root + source_file, 'r') as rottenTomatoesReviews:
         g = Graph()
+
+        g.add((URIRef(local + "Review"), RDFS.subClassOf, OWL.Class))
 
         reader = csv.DictReader(rottenTomatoesReviews, delimiter=',')
 
         found_films = set()
         start_time = time.time()
         for idx, row in enumerate(reader):
-            if idx % 1000 == 0:
+            if idx % 100000 == 0:
                 elapsed_time = time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time))
                 print("Idx: {}\tFound Movies: {}\tElapsed time: {}".format(idx, len(found_films), elapsed_time))
                 start_time = time.time()
@@ -48,20 +51,30 @@ if __name__ == "__main__":
                                                  filters=only_movie_filter,
                                                  spotter='Default')
 
-                for annotation in annotations:
+                for annotation in annotations[:1]:
                     found_films.add(annotation['URI'])
                     title = annotation['surfaceForm'].title()
 
-                    temp = URIRef(local + urllib.parse.quote(title))
-                    g.add((temp, RDF.type, dbpedia.film))
-                    g.add((temp, FOAF.name, Literal(title)))
+                    # Add surface label to film
+                    g.add((URIRef(annotation['URI']), local.hasSurfaceForm, Literal(title)))
 
+                    # Initiate review
+                    temp_review = URIRef(local + "review_{}".format(idx))
+                    g.add((temp_review, RDF.type, URIRef(local + "Review")))
+
+                    # Link review to film
+                    g.add((temp_review, local.describesAsReview, URIRef(annotation['URI'])))
+
+                    # Add text to review
+                    # g.add((temp_review, local.hasText, Literal(row['Review'])))
+
+                    # Abstract adjectives from review
                     splitSentence = row['Review'].split()
                     for word in splitSentence:
                         for tmp in wn.synsets(word):
                             if tmp.pos() == "a":
-                                g.add((temp, local.describedAs, Literal(word.title())))
-                                break
+                                g.add((temp_review, local.hasAdjective, Literal(word.title())))
+                            break
             except spotlight.SpotlightException or requests.exceptions.HTTPError:
                 continue
             except KeyboardInterrupt:
@@ -71,3 +84,6 @@ if __name__ == "__main__":
                 continue
 
         g.serialize(destination='rottenTomatoesRdf.ttl', format='turtle')
+
+        elapsed_time = time.strftime("%H:%M:%S", time.gmtime(time.time() - total_start_time))
+        print("Elapsed time: {}".format(elapsed_time))

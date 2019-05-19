@@ -1,12 +1,10 @@
 import git
 import time
 import requests
-import json
-
-import urllib.parse
+from dateutil.parser import parse
 
 from rdflib import URIRef, Graph, Literal, Namespace
-from rdflib.namespace import RDF, FOAF
+from rdflib.namespace import RDF, FOAF, OWL
 
 url = 'https://query.wikidata.org/sparql'
 query = """
@@ -50,16 +48,19 @@ if __name__ == "__main__":
     for person, p, name in g.triples((None, FOAF.name, None)):
         imdb_persons_uri.add((str(person), name))
 
+    print("Persons in imdb dataset: {}".format(len(imdb_persons_uri)))
+
     found_persons = set()
 
     g = Graph()
 
     start_time = time.time()
+    total_start_time = time.time()
     print("Starting searching person info")
     for idx, row in enumerate(imdb_persons_uri):
         try:
 
-            if idx % 100000 == 0:
+            if idx % 1000 == 0:
                 elapsed_time = time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time))
                 print("Idx: {}\tFound Persons: {}\tElapsed time: {}".format(idx, len(found_persons), elapsed_time))
                 start_time = time.time()
@@ -69,10 +70,21 @@ if __name__ == "__main__":
             r = requests.get(url, params={'format': 'json', 'query': query})
             data = r.json()
 
-            temp = URIRef(row[0])
-            g.add((temp, wdt.p569, data))
-            break
+            if data['results']['bindings']:
+
+                dateOfBirth = parse(data['results']['bindings'][0]['dateOfBirth']['value'])
+                person_uri = data['results']['bindings'][0]['entity']['value']
+
+                found_persons.add(person_uri)
+
+                temp = URIRef(row[0])
+                g.add((temp, OWL.sameAs, URIRef(person_uri)))
+                g.add((temp, RDF.type, FOAF.Person))
+                g.add((temp, wdt.p569, Literal(dateOfBirth)))
         except KeyboardInterrupt:
             break
 
     g.serialize(destination='dbpediaRdf.ttl', format='turtle')
+
+    elapsed_time = time.strftime("%H:%M:%S", time.gmtime(time.time() - total_start_time))
+    print("Elapsed time: {}".format(elapsed_time))

@@ -5,7 +5,7 @@ import time
 import urllib.parse
 
 from rdflib import URIRef, Graph, Literal, Namespace
-from rdflib.namespace import RDF, FOAF
+from rdflib.namespace import RDF, FOAF, OWL
 
 
 source_file_titles = "/data/imdb_short/title.basics_short.tsv"
@@ -20,6 +20,7 @@ if __name__ == "__main__":
     git_root = git_repo.git.rev_parse("--show-toplevel")
 
     local = Namespace("localhost:imdb/")
+    localRottenTomatoes = Namespace("localhost:rottenTomatoes/")
     dbpedia = Namespace("http://dbpedia.org/resource/")
 
     g = Graph()
@@ -27,14 +28,18 @@ if __name__ == "__main__":
     g.parse("rottenTomatoesRdf.ttl", format="ttl")
 
     rot_films = set()
+    rot_films_uri_dict = dict()
     found_films = set()
     found_persons = set()
 
-    for s, p, film in g.triples((None, FOAF.name, None)):
+    for rot_films_uri, p, film in g.triples((None, localRottenTomatoes.hasSurfaceForm, None)):
         rot_films.add(str(film).lower())
+        rot_films_uri_dict[str(film).lower()] = rot_films_uri
     print("Films in rot dataset: {}".format(len(rot_films)))
 
     g = Graph()
+
+    total_start_time = time.time()
 
     with open(git_root + source_file_titles, 'r') as imdbTitles:
         reader = csv.DictReader(imdbTitles, delimiter='\t')
@@ -51,12 +56,15 @@ if __name__ == "__main__":
                 if row['primaryTitle'].lower() in rot_films:
                     rot_films.remove(row['primaryTitle'].lower())
 
+                    rot_films_uri = rot_films_uri_dict[row['primaryTitle'].lower()]
+                    del rot_films_uri_dict[row['primaryTitle'].lower()]
+
                     found_films.add(row['tconst'])
                     title = row['primaryTitle'].title()
 
                     temp = URIRef(local + urllib.parse.quote(row['tconst']))
-                    g.add((temp, RDF.type, dbpedia.film))
-                    g.add((temp, FOAF.name, Literal(title)))
+                    g.add((temp, OWL.sameAs, URIRef(rot_films_uri)))
+                    g.add((temp, local.hasPrimaryName, Literal(title)))
             except KeyboardInterrupt:
                 break
     print("Length found films: {}".format(len(found_films)))
@@ -125,8 +133,13 @@ if __name__ == "__main__":
             try:
                 if row['nconst'] in found_persons:
                     temp_person = URIRef(local + urllib.parse.quote(row['nconst']))
+                    g.add((temp_person, RDF.type, FOAF.Person))
                     g.add((temp_person, FOAF.name, Literal(row['primaryName'])))
             except KeyboardInterrupt:
                 break
 
     g.serialize(destination='imdbRdf.ttl', format='turtle')
+
+    elapsed_time = time.strftime("%H:%M:%S", time.gmtime(time.time() - total_start_time))
+    print("Elapsed time: {}".format(elapsed_time))
+

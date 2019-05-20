@@ -1,0 +1,54 @@
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+select ?name
+where {?a foaf:name ?name}
+limit 100
+
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix ns1: <localhost:rottenTomatoes/>
+select ?review (count(?adjective) as ?number_of_adjectives)
+where {?review ns1:hasAdjective ?adjective}
+group by ?review
+order by desc(?number_of_adjectives)
+limit 100
+
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix ns1: <localhost:rottenTomatoes/>
+select ?name (count(?adjective) as ?number_of_adjectives)
+where {
+?review ns1:hasAdjective ?adjective.
+?review ns1:describesAsReview ?film.
+?film ns1:hasSurfaceForm ?name
+}
+group by ?name
+order by desc(?number_of_adjectives)
+limit 100
+
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix ns1: <localhost:rottenTomatoes/>
+prefix ns11: <localhost:imdb/>
+prefix ns21: <http://www.w3.org/2002/07/owl#>
+select ?name (count(?adjective) as ?number_of_adjectives)
+where {
+?review ns1:hasAdjective ?adjective.
+?review ns1:describesAsReview ?film.
+?film_eq ns21:sameAs ?film .
+?film_eq ns11:hasPrimaryName ?name.
+}
+group by ?name
+order by desc(?number_of_adjectives)
+limit 100
+
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix ns1: <localhost:rottenTomatoes/>
+prefix ns11: <localhost:imdb/>
+prefix ns21: <http://www.w3.org/2002/07/owl#>
+select ?name (count(?adjective) as ?number_of_adjectives) (group_concat(concat(str(?adjective));separator=',') as ?adjectives)
+where {
+?review ns1:hasAdjective ?adjective.
+?review ns1:describesAsReview ?film.
+?film_eq ns21:sameAs ?film .
+?film_eq ns11:hasPrimaryName ?name.
+}
+group by ?name
+order by desc(?number_of_adjectives)
+limit 100

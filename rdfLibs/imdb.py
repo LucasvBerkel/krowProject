@@ -25,7 +25,7 @@ if __name__ == "__main__":
 
     g = Graph()
 
-    g.parse("rottenTomatoesRdf.ttl", format="ttl")
+    g.parse(git_root + "/rdfLibs/rottenTomatoesRdf.ttl", format="ttl")
 
     rot_films = set()
     rot_films_uri_dict = dict()
@@ -46,27 +46,30 @@ if __name__ == "__main__":
 
         start_time = time.time()
         print("Starting converting imdb_titles")
-        for idx, row in enumerate(reader):
-            if idx % 100000 == 0:
-                elapsed_time = time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time))
-                print("Idx: {}\tFound Movies: {}\tElapsed time: {}".format(idx, len(found_films), elapsed_time))
-                start_time = time.time()
-
-            try:
+        try:
+            for idx, row in enumerate(reader):
+                if idx % 100000 == 0:
+                    elapsed_time = time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time))
+                    print("Idx: {}\tFound Movies: {}\tElapsed time: {}".format(idx, len(found_films), elapsed_time))
+                    start_time = time.time()
                 if row['primaryTitle'].lower() in rot_films:
                     rot_films.remove(row['primaryTitle'].lower())
 
                     rot_films_uri = rot_films_uri_dict[row['primaryTitle'].lower()]
                     del rot_films_uri_dict[row['primaryTitle'].lower()]
-
                     found_films.add(row['tconst'])
+
                     title = row['primaryTitle'].title()
 
-                    temp = URIRef(local + urllib.parse.quote(row['tconst']))
-                    g.add((temp, OWL.sameAs, URIRef(rot_films_uri)))
-                    g.add((temp, local.hasPrimaryName, Literal(title)))
-            except KeyboardInterrupt:
-                break
+                    temp_film = URIRef(local + urllib.parse.quote(row['tconst']))
+                    g.add((temp_film, OWL.sameAs, URIRef(rot_films_uri)))
+                    g.add((temp_film, local.hasPrimaryName, Literal(title)))
+                    g.add((temp_film, local.producedInYear, Literal(row['startYear'])))
+
+                    for genre in row['genres'].split(","):
+                        g.add((temp_film, local.hasGenre, Literal(genre)))
+        except KeyboardInterrupt:
+            pass
     print("Length found films: {}".format(len(found_films)))
 
     with open(git_root + source_file_crew, 'r') as imdbCrew:
@@ -74,12 +77,12 @@ if __name__ == "__main__":
 
         start_time = time.time()
         print("Starting converting imdb_crew")
-        for idx, row in enumerate(reader):
-            if idx % 100000 == 0:
-                elapsed_time = time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time))
-                print("Idx: {}\tElapsed time: {}".format(idx, elapsed_time))
-                start_time = time.time()
-            try:
+        try:
+            for idx, row in enumerate(reader):
+                if idx % 100000 == 0:
+                    elapsed_time = time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time))
+                    print("Idx: {}\tElapsed time: {}".format(idx, elapsed_time))
+                    start_time = time.time()
                 if row['tconst'] in found_films:
                     temp_film = URIRef(local + urllib.parse.quote(row['tconst']))
                     if row['directors']:
@@ -96,50 +99,48 @@ if __name__ == "__main__":
                             temp_person = URIRef(local + urllib.parse.quote(writer))
                             g.add((temp_film, local.writtenBy, temp_person))
                             found_persons.add(writer)
-            except KeyboardInterrupt:
-                break
+        except KeyboardInterrupt:
+            pass
 
     with open(git_root + source_file_principals, 'r') as imdbPrincipals:
         reader = csv.DictReader(imdbPrincipals, delimiter='\t')
 
         start_time = time.time()
         print("Starting converting imdb_principles")
-        for idx, row in enumerate(reader):
-            if idx % 100000 == 0:
-                elapsed_time = time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time))
-                print("Idx: {}\tElapsed time: {}".format(idx, elapsed_time))
-                start_time = time.time()
+        try:
+            for idx, row in enumerate(reader):
+                if idx % 100000 == 0:
+                    elapsed_time = time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time))
+                    print("Idx: {}\tElapsed time: {}".format(idx, elapsed_time))
+                    start_time = time.time()
 
-            try:
                 if row['tconst'] in found_films:
                     temp_film = URIRef(local + urllib.parse.quote(row['tconst']))
                     temp_person = URIRef(local + urllib.parse.quote(row['nconst']))
                     g.add((temp_film, local.actingPerfomedBy, temp_person))
                     found_persons.add(row['nconst'])
-            except KeyboardInterrupt:
-                break
+        except KeyboardInterrupt:
+            pass
 
     with open(git_root + source_file_names, 'r') as imdbNames:
         reader = csv.DictReader(imdbNames, delimiter='\t')
 
         start_time = time.time()
         print("Starting converting imdb names")
-        for idx, row in enumerate(reader):
-            if idx % 100000 == 0:
-                elapsed_time = time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time))
-                print("Idx: {}\tElapsed time: {}".format(idx, elapsed_time))
-                start_time = time.time()
-
-            try:
+        try:
+            for idx, row in enumerate(reader):
+                if idx % 100000 == 0:
+                    elapsed_time = time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time))
+                    print("Idx: {}\tElapsed time: {}".format(idx, elapsed_time))
+                    start_time = time.time()
                 if row['nconst'] in found_persons:
                     temp_person = URIRef(local + urllib.parse.quote(row['nconst']))
                     g.add((temp_person, RDF.type, FOAF.Person))
                     g.add((temp_person, FOAF.name, Literal(row['primaryName'])))
-            except KeyboardInterrupt:
-                break
+        except KeyboardInterrupt:
+            pass
 
-    g.serialize(destination='imdbRdf.ttl', format='turtle')
+    g.serialize(destination=git_root + '/rdfLibs/imdbRdf.ttl', format='turtle')
 
     elapsed_time = time.strftime("%H:%M:%S", time.gmtime(time.time() - total_start_time))
     print("Elapsed time: {}".format(elapsed_time))
-

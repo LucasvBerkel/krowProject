@@ -83,7 +83,7 @@ if __name__ == "__main__":
                 print(e)
                 continue
 
-        g.serialize(destination='rottenTomatoesRdf.ttl', format='turtle')
+        g.serialize(destination=git_root + '/rdfLibs/rottenTomatoesRdf.ttl', format='turtle')
 
         elapsed_time = time.strftime("%H:%M:%S", time.gmtime(time.time() - total_start_time))
         print("Elapsed time: {}".format(elapsed_time))

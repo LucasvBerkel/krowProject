@@ -1,3 +1,9 @@
+update_triples:
+		python rdfLibs/rottenTomatoes.py
+		python rdfLibs/imdb.py
+		python rdfLibs/dbpedia/py
+		python rdfLibs/combineRdfLibs.py
+
 docker-image:
 #		docker inspect -f '{{.State.Running}}' moviedb
 		docker stop moviedb

@@ -39,3 +39,5 @@ https://data.world/qwofford/recommended-daily-nutrients-and-macronutrients/activ
 Dutch Government datasets
 https://data.overheid.nl/
 
+Papers
+https://docs.google.com/document/d/1crNrLIHz8h1cf7UlmDGO1lsgMQEIqwIMYhTKalmOiPs/edit?usp=sharing

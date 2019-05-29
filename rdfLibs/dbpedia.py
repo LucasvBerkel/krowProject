@@ -114,6 +114,7 @@ if __name__ == "__main__":
                 if 'spouseName' in person_data:
                     temp_married_person = URIRef(person_data['spouse']['value'])
 
+                    g.add((temp_married_person, RDF.type, FOAF.person))
                     g.add((temp_person, FOAF.spouseOf, temp_married_person))
 
                     g.add((temp_married_person, FOAF.name, Literal(person_data['spouseName']['value'])))

@@ -54,7 +54,7 @@ if __name__ == "__main__":
     git_repo = git.Repo(".", search_parent_directories=True)
     git_root = git_repo.git.rev_parse("--show-toplevel")
 
-    local = Namespace("localhost:imdb/")
+    local = Namespace("localhost:movieCastingNamespace/")
     dbpedia = Namespace("http://dbpedia.org/resource/")
     wdt = Namespace("http://www.wikidata.org/prop/direct/")
 

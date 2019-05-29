@@ -20,7 +20,7 @@ if __name__ == "__main__":
     only_movie_filter = {'policy': "whitelist",
                          'types': "DBpedia:Film"}
 
-    local = Namespace("localhost:rottenTomatoes/")
+    local = Namespace("localhost:movieCastingNamespace/")
     dbpedia = Namespace("http://dbpedia.org/resource/")
 
     total_start_time = time.time()

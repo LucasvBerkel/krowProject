@@ -19,8 +19,7 @@ if __name__ == "__main__":
     git_repo = git.Repo(".", search_parent_directories=True)
     git_root = git_repo.git.rev_parse("--show-toplevel")
 
-    local = Namespace("localhost:imdb/")
-    localRottenTomatoes = Namespace("localhost:rottenTomatoes/")
+    local = Namespace("localhost:movieCastingNamespace/")
     dbpedia = Namespace("http://dbpedia.org/resource/")
 
     g = Graph()
@@ -32,7 +31,7 @@ if __name__ == "__main__":
     found_films = set()
     found_persons = set()
 
-    for rot_films_uri, p, film in g.triples((None, localRottenTomatoes.hasSurfaceForm, None)):
+    for rot_films_uri, p, film in g.triples((None, local.hasSurfaceForm, None)):
         rot_films.add(str(film).lower())
         rot_films_uri_dict[str(film).lower()] = rot_films_uri
     print("Films in rot dataset: {}".format(len(rot_films)))

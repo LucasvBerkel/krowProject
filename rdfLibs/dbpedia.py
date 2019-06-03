@@ -102,8 +102,11 @@ if __name__ == "__main__":
                 g.add((temp_person, RDF.type, FOAF.Person))
 
                 if 'dateOfBirth' in person_data:
-                    dateOfBirth = parse(person_data['dateOfBirth']['value'])
-                    g.add((temp_person, wdt.p569, Literal(dateOfBirth)))
+                    try:
+                        dateOfBirth = parse(person_data['dateOfBirth']['value'])
+                        g.add((temp_person, wdt.p569, Literal(dateOfBirth)))
+                    except ValueError:
+                        pass
 
                 if 'gender' in person_data:
                     g.add((temp_person, wdt.P21, Literal(person_data['gender']['value'])))
@@ -119,13 +122,20 @@ if __name__ == "__main__":
 
                     g.add((temp_married_person, FOAF.name, Literal(person_data['spouseName']['value'])))
                     if 'spouseDateOfBirth' in person_data:
-                        g.add((temp_married_person, wdt.P569, Literal(person_data['spouseDateOfBirth']['value'])))
+                        try:
+                            dateOfBirth = parse(person_data['spouseDateOfBirth']['value'])
+                            g.add((temp_married_person, wdt.P569, Literal(dateOfBirth)))
+                        except ValueError:
+                            continue
+
                     if 'spouseGender' in person_data:
                         g.add((temp_married_person, wdt.P21, Literal(person_data['spouseGender']['value'])))
                     if 'spouseCountryOfOrigin' in person_data:
                         g.add((temp_married_person, wdt.P27, Literal(person_data['spouseCountryOfOrigin']['value'])))
         except KeyboardInterrupt:
             break
+        except ConnectionError:
+            continue
 
     g.serialize(destination=git_root + '/rdfLibs/dbpediaRdf.ttl', format='turtle')
 

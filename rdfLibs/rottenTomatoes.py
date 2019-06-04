@@ -12,8 +12,45 @@ from rdflib.namespace import RDF, RDFS, OWL
 
 source_file = "/data/rotten-tomatoes/rotten_tomatoes_reviews.csv"
 
-if __name__ == "__main__":
 
+def analyse_line(line_of_text):
+    only_movie_filter = {'policy': "whitelist",
+                         'types': "DBpedia:Film"}
+
+    formed_triples = []
+
+    try:
+        annotations = spotlight.annotate('http://localhost:2222/rest/annotate',
+                                         line_of_text,
+                                         confidence=0.4,
+                                         support=20,
+                                         filters=only_movie_filter,
+                                         spotter='Default')
+
+        for annotation in annotations[:1]:
+            title = annotation['surfaceForm'].title()
+
+            # Add surface label to film
+            formed_triples.append((annotation['URI'], "_.hasSurfaceForm", title))
+
+            # Link review to film
+            formed_triples.append(("review_#", "_.describesAsReview", annotation['URI']))
+
+            # Abstract adjectives from review
+            local_split_sentence = line_of_text.split()
+            for word in local_split_sentence:
+                for tmp in wn.synsets(word):
+                    if tmp.pos() == "a":
+                        formed_triples.append(("review_#", "_.hasAdjective", word.title()))
+                    break
+    except spotlight.SpotlightException or requests.exceptions.HTTPError:
+        pass
+    except BaseException as e:
+        print(e)
+    return formed_triples
+
+
+def create_rot_graph():
     git_repo = git.Repo(".", search_parent_directories=True)
     git_root = git_repo.git.rev_parse("--show-toplevel")
 
@@ -21,7 +58,6 @@ if __name__ == "__main__":
                          'types': "DBpedia:Film"}
 
     local = Namespace("localhost:movieCastingNamespace/")
-    dbpedia = Namespace("http://dbpedia.org/resource/")
 
     total_start_time = time.time()
 
@@ -40,10 +76,6 @@ if __name__ == "__main__":
                 print("Idx: {}\tFound Movies: {}\tElapsed time: {}".format(idx, len(found_films), elapsed_time))
                 start_time = time.time()
             try:
-                # annotations = spotlight.annotate('http://api.dbpedia-spotlight.org/en/annotate',
-                #                                  row["Review"],
-                #                                  confidence=0.4, support=20, filters=only_movie_filter)
-
                 annotations = spotlight.annotate('http://localhost:2222/rest/annotate',
                                                  row["Review"],
                                                  confidence=0.4,
@@ -69,8 +101,8 @@ if __name__ == "__main__":
                     # g.add((temp_review, local.hasText, Literal(row['Review'])))
 
                     # Abstract adjectives from review
-                    splitSentence = row['Review'].split()
-                    for word in splitSentence:
+                    split_sentence = row['Review'].split()
+                    for word in split_sentence:
                         for tmp in wn.synsets(word):
                             if tmp.pos() == "a":
                                 g.add((temp_review, local.hasAdjective, Literal(word.title())))
@@ -87,3 +119,7 @@ if __name__ == "__main__":
 
         elapsed_time = time.strftime("%H:%M:%S", time.gmtime(time.time() - total_start_time))
         print("Elapsed time: {}".format(elapsed_time))
+
+
+if __name__ == "__main__":
+    create_rot_graph()

@@ -13,43 +13,6 @@ from rdflib.namespace import RDF, RDFS, OWL
 source_file = "/data/rotten-tomatoes/rotten_tomatoes_reviews.csv"
 
 
-def analyse_line(line_of_text):
-    only_movie_filter = {'policy': "whitelist",
-                         'types': "DBpedia:Film"}
-
-    formed_triples = []
-
-    try:
-        annotations = spotlight.annotate('http://localhost:2222/rest/annotate',
-                                         line_of_text,
-                                         confidence=0.4,
-                                         support=20,
-                                         filters=only_movie_filter,
-                                         spotter='Default')
-
-        for annotation in annotations[:1]:
-            title = annotation['surfaceForm'].title()
-
-            # Add surface label to film
-            formed_triples.append((annotation['URI'], "_.hasSurfaceForm", title))
-
-            # Link review to film
-            formed_triples.append(("review_#", "_.describesAsReview", annotation['URI']))
-
-            # Abstract adjectives from review
-            local_split_sentence = line_of_text.split()
-            for word in local_split_sentence:
-                for tmp in wn.synsets(word):
-                    if tmp.pos() == "a":
-                        formed_triples.append(("review_#", "_.hasAdjective", word.title()))
-                    break
-    except spotlight.SpotlightException or requests.exceptions.HTTPError:
-        pass
-    except BaseException as e:
-        print(e)
-    return formed_triples
-
-
 def create_rot_graph():
     git_repo = git.Repo(".", search_parent_directories=True)
     git_root = git_repo.git.rev_parse("--show-toplevel")

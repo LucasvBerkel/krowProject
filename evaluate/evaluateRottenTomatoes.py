@@ -5,9 +5,11 @@ import git
 import csv
 
 from nltk.corpus import wordnet as wn
+from ast import literal_eval
 
 
 source_file = "/data/rotten-tomatoes/rotten_tomatoes_reviews.csv"
+hand_evaluated_file = "/evaluate/handEvaluated.tsv"
 
 
 def analyse_line(line_of_text):
@@ -94,27 +96,42 @@ def analyse_handanalysed_data():
     git_root = git_repo.git.rev_parse("--show-toplevel")
 
     idx = 0
+    eval_dict = {}
+    max_idx = 0
 
     total_start_time = time.time()
 
-    with open(git_root + source_file, 'r') as rottenTomatoesReviews:
+    with open(git_root + hand_evaluated_file, 'r') as evalFile:
+        for row in csv.DictReader(evalFile, delimiter='\t'):
+            eval_dict[int(row['idx'])] = {'idx': row['idx'],
+                                          'movieTitle': row['movieTitle'],
+                                          'adjectives': literal_eval(row['adjectives'])}
+            if int(row['idx']) > max_idx:
+                max_idx = int(row['idx'])
 
+    with open(git_root + source_file, 'r') as rottenTomatoesReviews:
         reader = csv.DictReader(rottenTomatoesReviews, delimiter=',')
 
         found_films = set()
         valid_reviews = []
         number_of_adjectives = 0
-        start_time = time.time()
+
+        number_of_same_found_movies = 0
+        total_same_reviews = 0
         try:
             for idx, row in enumerate(reader):
-                if idx % 100000 == 0:
-                    elapsed_time = time.strftime("%H:%M:%S", time.gmtime(time.time() - start_time))
-                    print("Idx: {}\tFound Movies: {}\tElapsed time: {}".format(idx, len(found_films), elapsed_time))
-                    start_time = time.time()
+                if idx > max_idx:
+                    break
 
                 found_info = analyse_line(row['Review'])
 
                 if found_info:
+                    if idx in eval_dict:
+                        total_same_reviews += 1
+                        if found_info['title'] == eval_dict[idx]['movieTitle']:
+                            number_of_same_found_movies += 1
+                        else:
+                            print("Found: {}\tHand: {}".format(found_info['title'], eval_dict[idx]['movieTitle']))
                     found_films.add(found_info['URI'])
                     valid_reviews.append(found_info)
                     number_of_adjectives += len(found_info['adjectives'])
@@ -127,9 +144,14 @@ def analyse_handanalysed_data():
         print("Number of reviews containing filmname: {}".format(len(valid_reviews)))
         print("Number of found adjectives in all reviews: {}".format(number_of_adjectives))
 
+        print("Same found films: {}".format(number_of_same_found_movies))
+        print("Movies found in same reviews: {}".format(total_same_reviews))
+        print("Not same movies: {}".format(len(found_films)-number_of_same_found_movies))
+
         elapsed_time = time.strftime("%H:%M:%S", time.gmtime(time.time() - total_start_time))
         print("Elapsed time: {}".format(elapsed_time))
 
 
 if __name__ == "__main__":
+    # analyse_handanalysed_data()
     analyse_all_reviews()

@@ -4,7 +4,7 @@ where {?a foaf:name ?name}
 limit 100
 
 prefix foaf: <http://xmlns.com/foaf/0.1/>
-prefix ns1: <localhost:rottenTomatoes/>
+prefix ns1: <localhost:movieCastingNamespace/>
 select ?review (count(?adjective) as ?number_of_adjectives)
 where {?review ns1:hasAdjective ?adjective}
 group by ?review
@@ -12,7 +12,7 @@ order by desc(?number_of_adjectives)
 limit 100
 
 prefix foaf: <http://xmlns.com/foaf/0.1/>
-prefix ns1: <localhost:rottenTomatoes/>
+prefix ns1: <localhost:movieCastingNamespace/>
 select ?name (count(?adjective) as ?number_of_adjectives)
 where {
 ?review ns1:hasAdjective ?adjective.
@@ -24,31 +24,46 @@ order by desc(?number_of_adjectives)
 limit 100
 
 prefix foaf: <http://xmlns.com/foaf/0.1/>
-prefix ns1: <localhost:rottenTomatoes/>
-prefix ns11: <localhost:imdb/>
+prefix ns1: <localhost:movieCastingNamespace/>
 prefix ns21: <http://www.w3.org/2002/07/owl#>
 select ?name (count(?adjective) as ?number_of_adjectives)
 where {
 ?review ns1:hasAdjective ?adjective.
 ?review ns1:describesAsReview ?film.
 ?film_eq ns21:sameAs ?film .
-?film_eq ns11:hasPrimaryName ?name.
+?film_eq ns1:hasPrimaryName ?name.
 }
 group by ?name
 order by desc(?number_of_adjectives)
 limit 100
 
 prefix foaf: <http://xmlns.com/foaf/0.1/>
-prefix ns1: <localhost:rottenTomatoes/>
-prefix ns11: <localhost:imdb/>
+prefix ns1: <localhost:movieCastingNamespace/>
 prefix ns21: <http://www.w3.org/2002/07/owl#>
-select ?name (count(?adjective) as ?number_of_adjectives) (group_concat(concat(str(?adjective));separator=',') as ?adjectives)
+select ?name ?name2
 where {
-?review ns1:hasAdjective ?adjective.
-?review ns1:describesAsReview ?film.
-?film_eq ns21:sameAs ?film .
-?film_eq ns11:hasPrimaryName ?name.
+?entity foaf:spouseOf ?entity2 .
+?entity foaf:name ?name .
+?entity2 foaf:name ?name2 .
 }
-group by ?name
-order by desc(?number_of_adjectives)
 limit 100
+
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix local: <localhost:movieCastingNamespace/>
+prefix wiki: <http://www.wikidata.org/prop/direct/>
+prefix owl: <http://www.w3.org/2002/07/owl#>
+select ?name ?filmName
+where {
+?entity foaf:spouseOf ?entity2 .
+?entity foaf:name ?name .
+?entity wiki:P27 ?country_of_origin .
+?entity2 wiki:P27 ?country_of_origin2 .
+?film local:actingPerfomedBy ?entity .
+?film owl:sameAs ?dbFilm .
+?film local:hasPrimaryName ?filmName .
+?review local:describesAsReview ?dbFilm .
+?review local:hasAdjective "Strange" .
+FILTER(?country_of_origin != ?country_of_origin2)
+}
+limit 100
+
